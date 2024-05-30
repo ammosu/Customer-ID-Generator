@@ -57,6 +57,7 @@ async def import_excel(file: UploadFile = File(...)):
     df['CustomerID'] = df['CustomerID'].fillna('').astype(str)
     generator.data = pd.concat([generator.data, df], ignore_index=True).drop_duplicates(subset=['CustomerID'])
     generator.save_to_s3()
+    generator.refresh_data()  # 刷新內存中的數據
     return {"detail": "Excel file imported successfully"}
 
 @app.get("/export_excel")
@@ -76,6 +77,7 @@ def delete_customer_id(customer_id: str):
     if customer_id in generator.data['CustomerID'].values:
         generator.data = generator.data[generator.data['CustomerID'] != customer_id]
         generator.save_to_s3()
+        generator.refresh_data()  # 刷新內存中的數據
         logging.info(f"Deleted Customer ID: {customer_id}")
         return {"detail": "Customer ID deleted successfully"}
     else:
@@ -93,6 +95,7 @@ def generate_customer_id(request: CustomerRequest, confirm: bool = False):
     if confirm:
         customer_id = generator.generate_customer_id(
             request.region, request.category, request.company_name, request.extra_region_code, request.branch_name)
+        generator.refresh_data()  # 刷新內存中的數據
         return {"customer_id": customer_id, "status": "generated"}
     else:
         customer_id = generator.preview_customer_id(
@@ -101,13 +104,11 @@ def generate_customer_id(request: CustomerRequest, confirm: bool = False):
 
 @app.get("/query_customer_id/{company_name}")
 def query_customer_id(company_name: str):
-    logging.info(f"Querying Customer ID for company: {company_name}")
+    generator.refresh_data()  # 刷新內存中的數據
     result = generator.query_customer_id(company_name)
     if result.empty:
-        logging.warning(f"Customer ID not found for company: {company_name}")
         return {"detail": "Customer ID not found", "data": []}
     result = result.replace({np.inf: np.nan, -np.inf: np.nan}).fillna('')
-    logging.info(f"Customer ID found: {result.to_dict(orient='records')}")
     return {"detail": "Customer ID found", "data": result.to_dict(orient='records')}
 
 @app.get("/search_company_name/")
@@ -115,23 +116,21 @@ def search_company_name(keyword: str = Query(..., min_length=1), region: str = N
     company_names = generator.search_company_name(keyword, region, category)
     return {"company_names": company_names}
 
-@app.get("/search_branch_name/")
-def search_branch_name(keyword: str = Query(..., min_length=1), region: str = None, category: str = None, company_name: str = None):
-    branch_names = generator.search_branch_name(keyword, region, category, company_name)
-    return {"branch_names": branch_names}
-
-# 添加新的搜尋所有公司名稱的路由
 @app.get("/search_all_company_names/")
 def search_all_company_names(keyword: str = Query(..., min_length=1)):
     company_names = generator.search_company_name(keyword)
     return {"company_names": company_names}
 
-# 搜尋所有客戶ID的路由
 @app.get("/search_all_customer_ids/")
 def search_all_customer_ids(keyword: str = Query(..., min_length=1)):
     filtered_data = generator.data[generator.data['CustomerID'].str.contains(keyword, case=False, na=False)]
     customer_ids = filtered_data['CustomerID'].unique().tolist()
     return {"customer_ids": customer_ids}
+
+@app.get("/search_branch_name/")
+def search_branch_name(keyword: str = Query(..., min_length=1), region: str = None, category: str = None, company_name: str = None):
+    branch_names = generator.search_branch_name(keyword, region, category, company_name)
+    return {"branch_names": branch_names}
 
 @app.get("/regions")
 def get_regions():
@@ -143,6 +142,6 @@ def get_categories():
 
 app.mount("/", StaticFiles(directory=".", html=True), name="static")
 
-# if __name__ == "__main__":
-#     import uvicorn
-#     uvicorn.run(app)
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app)
