@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File, Query
-from fastapi.responses import FileResponse
+from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, field_validator
@@ -189,7 +189,11 @@ def export_excel():
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         generator.data.to_excel(writer, index=False)
     output.seek(0)
-    return FileResponse(output, filename="customer_ids.xlsx", media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    headers = {
+        'Content-Disposition': 'attachment; filename="customer_ids.xlsx"',
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    }
+    return StreamingResponse(output, headers=headers)
 
 @app.delete("/delete_customer_id/{customer_id}")
 def delete_customer_id(customer_id: str):
