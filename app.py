@@ -117,6 +117,12 @@ def search_branch_name(keyword: str = Query(..., min_length=1), region: str = No
     branch_names = generator.search_branch_name(keyword, region, category, company_name)
     return {"branch_names": branch_names}
 
+# 添加新的搜尋所有公司名稱的路由
+@app.get("/search_all_company_names/")
+def search_all_company_names(keyword: str = Query(..., min_length=1)):
+    company_names = generator.search_company_name(keyword)
+    return {"company_names": company_names}
+
 @app.get("/regions")
 def get_regions():
     return ["北投", "台南", "高雄"]
@@ -127,6 +133,6 @@ def get_categories():
 
 app.mount("/", StaticFiles(directory=".", html=True), name="static")
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app)
+# if __name__ == "__main__":
+#     import uvicorn
+#     uvicorn.run(app)

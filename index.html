@@ -44,7 +44,8 @@
             <h2>Query Customer ID</h2>
             <form id="query-form">
                 <label for="query_company_name">Company Name:</label>
-                <input type="text" id="query_company_name" name="query_company_name">
+                <input type="text" id="query_company_name" name="query_company_name" oninput="searchAllCompanyNames(this.value)">
+                <div id="query_company_name_list" class="autocomplete-items"></div>
 
                 <button type="submit">Query</button>
             </form>

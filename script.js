@@ -209,29 +209,25 @@ async function searchCompanyName(keyword) {
     });
 }
 
-async function searchBranchName(keyword) {
-    const region = document.getElementById('region').value;
-    const category = document.getElementById('category').value;
-    const company_name = document.getElementById('company_name').value;
-
+async function searchAllCompanyNames(keyword) {
     if (keyword.length < 1) {
-        document.getElementById('branch_name_list').innerHTML = '';
+        document.getElementById('query_company_name_list').innerHTML = '';
         return;
     }
 
-    const response = await fetch(`${backendUrl}/search_branch_name/?keyword=${keyword}&region=${region}&category=${category}&company_name=${company_name}`);
+    const response = await fetch(`${backendUrl}/search_all_company_names/?keyword=${keyword}`);
     const result = await response.json();
-    const branchNameList = document.getElementById('branch_name_list');
-    branchNameList.innerHTML = '';
+    const companyNameList = document.getElementById('query_company_name_list');
+    companyNameList.innerHTML = '';
 
-    result.branch_names.forEach(name => {
+    result.company_names.forEach(name => {
         const div = document.createElement('div');
         div.innerText = name;
         div.addEventListener('click', () => {
-            document.getElementById('branch_name').value = name;
-            branchNameList.innerHTML = '';
+            document.getElementById('query_company_name').value = name;
+            companyNameList.innerHTML = '';
         });
-        branchNameList.appendChild(div);
+        companyNameList.appendChild(div);
     });
 }
 
