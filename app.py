@@ -68,6 +68,7 @@ class CustomerIDGenerator:
         return pd.read_excel(io.BytesIO(response['Body'].read()), engine='openpyxl')
 
     def generate_customer_id(self, region, category, company_name, extra_region_code=None, branch_name=None):
+        self.data['CustomerID'] = self.data['CustomerID'].astype(str)  # 確保 CustomerID 是字符串格式
         existing_record = self.data[
             (self.data['Region'] == region) &
             (self.data['Category'] == category) &
@@ -169,7 +170,7 @@ class CustomerRequest(BaseModel):
 
     @field_validator('category')
     def category_must_be_valid(cls, v):
-        valid_categories = ["連鎖或相關企業的合開發票", "連鎖或相關企業的不合開發票", "單一客戶", "機動", "未定", daching_relationship, "其他"]
+        valid_categories = ["連鎖或相關企業的合開發票", "連鎖或相關企業的合開發票", "單一客戶", "機動", "未定", daching_relationship, "其他"]
         if v not in valid_categories:
             raise ValueError('Invalid category')
         return v
