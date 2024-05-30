@@ -46,8 +46,9 @@ input[type="text"], select {
     overflow-y: auto;
     background-color: #fff;
     position: absolute;
-    width: calc(100% - 22px);
+    width: 100%;
     z-index: 1;
+    box-sizing: border-box; /* 确保宽度计算包含边框 */
 }
 .autocomplete-items div {
     padding: 10px;
