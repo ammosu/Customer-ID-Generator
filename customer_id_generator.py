@@ -41,16 +41,17 @@ class CustomerIDGenerator:
                 self.data.to_excel(writer, index=False)
             output.seek(0)
             s3_client.put_object(Bucket=s3_bucket_name, Key=self.excel_file, Body=output.read())
-            
+
     def refresh_data(self):
         self.data = self.load_from_s3()
 
     def load_from_s3(self):
         response = s3_client.get_object(Bucket=s3_bucket_name, Key=self.excel_file)
-        return pd.read_excel(io.BytesIO(response['Body'].read()), engine='openpyxl')
+        data = pd.read_excel(io.BytesIO(response['Body'].read()), engine='openpyxl')
+        data['CustomerID'] = data['CustomerID'].astype(str)
+        return data
 
     def preview_customer_id(self, region, category, company_name, extra_region_code=None, branch_name=None):
-        self.data['CustomerID'] = self.data['CustomerID'].astype(str)
         existing_record = self.data[
             (self.data['Region'] == region) &
             (self.data['Category'] == category) &
@@ -101,7 +102,6 @@ class CustomerIDGenerator:
         return customer_id
     
     def generate_customer_id(self, region, category, company_name, extra_region_code=None, branch_name=None):
-        self.data['CustomerID'] = self.data['CustomerID'].astype(str)
         existing_record = self.data[
             (self.data['Region'] == region) &
             (self.data['Category'] == category) &

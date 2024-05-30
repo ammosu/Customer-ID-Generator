@@ -49,7 +49,7 @@ document.getElementById('generate-form').addEventListener('submit', async functi
     const branch_name = document.getElementById('branch_name').value;
 
     if (!company_name || (["連鎖或相關企業的合開發票", "連鎖或相關企業的不合開發票", "達清關係企業"].includes(category) && !branch_name)) {
-        alert("Company Name 和 Branch Name (若適用) 不能為空。");
+        alert("公司名稱和分支名稱（若適用）不能為空。");
         return;
     }
 
@@ -69,9 +69,9 @@ document.getElementById('generate-form').addEventListener('submit', async functi
 
     const result = await response.json();
     const previewResult = document.getElementById('generate-result');
-    previewResult.innerHTML = `Preview Customer ID: ${result.customer_id} <br> 
-                               <button id="confirm-button">Confirm</button> 
-                               <button id="cancel-button">Cancel</button>`;
+    previewResult.innerHTML = `預覽客戶ID: ${result.customer_id} <br> 
+                               <button id="confirm-button">確認</button> 
+                               <button id="cancel-button">取消</button>`;
 
     document.getElementById('confirm-button').addEventListener('click', async function() {
         const confirmResponse = await fetch(backendUrl + '/generate_customer_id?confirm=true', {
@@ -89,7 +89,7 @@ document.getElementById('generate-form').addEventListener('submit', async functi
         });
 
         const confirmResult = await confirmResponse.json();
-        previewResult.innerHTML = `Generated Customer ID: ${confirmResult.customer_id}`;
+        previewResult.innerHTML = `已生成客戶ID: ${confirmResult.customer_id}`;
     });
 
     document.getElementById('cancel-button').addEventListener('click', function() {
@@ -102,22 +102,26 @@ document.getElementById('query-form').addEventListener('submit', async function(
     const company_name = document.getElementById('query_company_name').value;
 
     if (!company_name) {
-        alert("Company Name 不能為空。");
+        alert("公司名稱不能為空。");
         return;
     }
 
-    const response = await fetch(backendUrl + `/query_customer_id/${company_name}`, {
-        method: 'GET'
+    const response = await fetch(backendUrl + '/query_customer_id', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ company_name })
     });
 
     const result = await response.json();
     const queryResult = document.getElementById('query-result');
     queryResult.innerHTML = '';
 
-    if (result.detail === "Customer ID not found") {
+    if (result.detail === "查無此客戶ID") {
         const errorMsg = document.createElement('div');
         errorMsg.className = 'error';
-        errorMsg.innerText = 'Customer ID not found';
+        errorMsg.innerText = '查無此客戶ID';
         queryResult.appendChild(errorMsg);
     } else {
         displayData(result.data);
@@ -129,11 +133,11 @@ document.getElementById('delete-form').addEventListener('submit', async function
     const customer_id = document.getElementById('delete_customer_id').value;
 
     if (!customer_id) {
-        alert("Customer ID 不能為空。");
+        alert("客戶ID不能為空。");
         return;
     }
 
-    if (!confirm(`Are you sure you want to delete Customer ID: ${customer_id}?`)) {
+    if (!confirm(`您確定要刪除客戶ID: ${customer_id} 嗎？`)) {
         return;
     }
 
@@ -143,7 +147,7 @@ document.getElementById('delete-form').addEventListener('submit', async function
 
     if (response.status === 404) {
         const result = await response.json();
-        document.getElementById('delete-result').innerText = 'Customer ID not found';
+        document.getElementById('delete-result').innerText = '查無此客戶ID';
         document.getElementById('delete-result').className = 'error';
     } else {
         const result = await response.json();
@@ -167,7 +171,7 @@ document.getElementById('export-excel').addEventListener('click', async function
         a.click();
         window.URL.revokeObjectURL(url);
     } else {
-        alert("Failed to export Excel");
+        alert("匯出Excel失敗");
     }
 });
 

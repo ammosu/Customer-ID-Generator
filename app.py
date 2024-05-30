@@ -50,6 +50,9 @@ class CustomerRequest(BaseModel):
             raise ValueError('Invalid category')
         return v
 
+class QueryCustomerRequest(BaseModel):
+    company_name: str
+
 @app.post("/import_excel")
 async def import_excel(file: UploadFile = File(...)):
     content = await file.read()
@@ -102,14 +105,14 @@ def generate_customer_id(request: CustomerRequest, confirm: bool = False):
             request.region, request.category, request.company_name, request.extra_region_code, request.branch_name)
         return {"customer_id": customer_id, "status": "preview"}
 
-@app.get("/query_customer_id/{company_name}")
-def query_customer_id(company_name: str):
+@app.post("/query_customer_id")
+def query_customer_id(request: QueryCustomerRequest):
     generator.refresh_data()  # 刷新內存中的數據
-    result = generator.query_customer_id(company_name)
+    result = generator.query_customer_id(request.company_name)
     if result.empty:
-        return {"detail": "Customer ID not found", "data": []}
+        return {"detail": "查無此客戶ID", "data": []}
     result = result.replace({np.inf: np.nan, -np.inf: np.nan}).fillna('')
-    return {"detail": "Customer ID found", "data": result.to_dict(orient='records')}
+    return {"detail": "查詢成功", "data": result.to_dict(orient='records')}
 
 @app.get("/search_company_name/")
 def search_company_name(keyword: str = Query(..., min_length=1), region: str = None, category: str = None):
