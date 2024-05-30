@@ -38,6 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchOptions('/categories', 'category');
 });
 
+// script.js
+
 document.getElementById('generate-form').addEventListener('submit', async function(event) {
     event.preventDefault();
     const region = document.getElementById('region').value;
@@ -228,6 +230,28 @@ async function searchAllCompanyNames(keyword) {
             companyNameList.innerHTML = '';
         });
         companyNameList.appendChild(div);
+    });
+}
+
+async function searchAllCustomerIDs(keyword) {
+    if (keyword.length < 1) {
+        document.getElementById('delete_customer_id_list').innerHTML = '';
+        return;
+    }
+
+    const response = await fetch(`${backendUrl}/search_all_customer_ids/?keyword=${keyword}`);
+    const result = await response.json();
+    const customerIDList = document.getElementById('delete_customer_id_list');
+    customerIDList.innerHTML = '';
+
+    result.customer_ids.forEach(id => {
+        const div = document.createElement('div');
+        div.innerText = id;
+        div.addEventListener('click', () => {
+            document.getElementById('delete_customer_id').value = id;
+            customerIDList.innerHTML = '';
+        });
+        customerIDList.appendChild(div);
     });
 }
 

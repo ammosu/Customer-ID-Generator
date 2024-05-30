@@ -57,7 +57,8 @@
             <h2>Delete Customer ID</h2>
             <form id="delete-form">
                 <label for="delete_customer_id">Customer ID:</label>
-                <input type="text" id="delete_customer_id" name="delete_customer_id">
+                <input type="text" id="delete_customer_id" name="delete_customer_id" oninput="searchAllCustomerIDs(this.value)">
+                <div id="delete_customer_id_list" class="autocomplete-items"></div>
 
                 <button type="submit">Delete</button>
             </form>

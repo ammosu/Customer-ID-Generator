@@ -123,6 +123,13 @@ def search_all_company_names(keyword: str = Query(..., min_length=1)):
     company_names = generator.search_company_name(keyword)
     return {"company_names": company_names}
 
+# 搜尋所有客戶ID的路由
+@app.get("/search_all_customer_ids/")
+def search_all_customer_ids(keyword: str = Query(..., min_length=1)):
+    filtered_data = generator.data[generator.data['CustomerID'].str.contains(keyword, case=False, na=False)]
+    customer_ids = filtered_data['CustomerID'].unique().tolist()
+    return {"customer_ids": customer_ids}
+
 @app.get("/regions")
 def get_regions():
     return ["北投", "台南", "高雄"]
