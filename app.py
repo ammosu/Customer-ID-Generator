@@ -101,10 +101,13 @@ def generate_customer_id(request: CustomerRequest, confirm: bool = False):
 
 @app.get("/query_customer_id/{company_name}")
 def query_customer_id(company_name: str):
+    logging.info(f"Querying Customer ID for company: {company_name}")
     result = generator.query_customer_id(company_name)
     if result.empty:
+        logging.warning(f"Customer ID not found for company: {company_name}")
         return {"detail": "Customer ID not found", "data": []}
     result = result.replace({np.inf: np.nan, -np.inf: np.nan}).fillna('')
+    logging.info(f"Customer ID found: {result.to_dict(orient='records')}")
     return {"detail": "Customer ID found", "data": result.to_dict(orient='records')}
 
 @app.get("/search_company_name/")
