@@ -15,7 +15,7 @@ import boto3
 load_dotenv()
 
 # 獲取環境變數
-daching_relationship = os.getenv('DACHING_RELATIONSHIP')
+daching_relationship = os.getenv('daching_relationship')
 s3_bucket_name = os.getenv('S3_BUCKET_NAME')
 s3_region = os.getenv('AWS_REGION')
 s3_directory = os.getenv('S3_DIRECTORY')
