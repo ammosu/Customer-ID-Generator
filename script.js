@@ -20,13 +20,40 @@ async function fetchOptions(url, selectId) {
 function updateFormVisibility() {
     const category = document.getElementById('category').value;
     const extraFields = document.getElementById('extra_fields');
+    const branchHandling = document.getElementById('branch_handling');
+    const branchHandlingLabel = document.getElementById('branch_handling_label');
+    const branchName = document.getElementById('branch_name');
+    const branchNameLabel = document.getElementById('branch_name_label');
 
-    if (["0連鎖或相關企業的合開發票", "1連鎖或相關企業的不合開發票", "8達清關係企業"].includes(category)) {
+    if (category === "0連鎖或相關企業的合開發票") {
         extraFields.style.display = 'block';
+        branchHandling.style.display = 'block';
+        branchHandlingLabel.style.display = 'block';
+        branchHandling.value = '00開立發票客編';
+        updateBranchHandling();
+    } else if (["0連鎖或相關企業的合開發票", "1連鎖或相關企業的不合開發票", "8達清關係企業"].includes(category)) {
+        extraFields.style.display = 'block';
+        branchHandling.style.display = 'none';
+        branchHandlingLabel.style.display = 'none';
+        branchName.style.display = 'block';
+        branchNameLabel.style.display = 'block';
     } else {
         extraFields.style.display = 'none';
-        document.getElementById('extra_region_code').value = '';
-        document.getElementById('branch_name').value = '';
+    }
+}
+
+function updateBranchHandling() {
+    const branchHandling = document.getElementById('branch_handling').value;
+    const branchName = document.getElementById('branch_name');
+    const branchNameLabel = document.getElementById('branch_name_label');
+
+    if (branchHandling === "00開立發票客編") {
+        branchName.style.display = 'none';
+        branchNameLabel.style.display = 'none';
+        branchName.value = ''; // Clear the branch name if not needed
+    } else {
+        branchName.style.display = 'block';
+        branchNameLabel.style.display = 'block';
     }
 }
 
@@ -43,8 +70,10 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchOptions('/extra_region_codes', 'extra_region_code');
     document.getElementById('category').addEventListener('change', updateFormVisibility);
 
-    // Initially show extra fields
-    document.getElementById('extra_fields').style.display = 'block';
+    // Initially hide branch handling select and its label
+    document.getElementById('branch_handling').style.display = 'none';
+    document.getElementById('branch_handling_label').style.display = 'none';
+    updateFormVisibility(); // Initialize form visibility based on default category
 });
 
 document.getElementById('generate-form').addEventListener('submit', async function(event) {
@@ -53,11 +82,16 @@ document.getElementById('generate-form').addEventListener('submit', async functi
     const category = document.getElementById('category').value;
     const company_name = document.getElementById('company_name').value;
     const extra_region_code = document.getElementById('extra_region_code').value;
-    const branch_name = document.getElementById('branch_name').value;
+    const branch_handling = document.getElementById('branch_handling').value;
+    let branch_name = document.getElementById('branch_name').value;
 
-    if (!company_name || (["0連鎖或相關企業的合開發票", "1連鎖或相關企業的不合開發票", "8達清關係企業"].includes(category) && !branch_name)) {
+    if (!company_name || (category === "0連鎖或相關企業的合開發票" && branch_handling === "以流水號編列此分行" && !branch_name)) {
         alert("公司名稱和分支名稱（若適用）不能為空。");
         return;
+    }
+
+    if (branch_handling === "00開立發票客編") {
+        branch_name = ''; // 設置為空字符串
     }
 
     const response = await fetch(backendUrl + '/preview_customer_id', {
@@ -70,7 +104,8 @@ document.getElementById('generate-form').addEventListener('submit', async functi
             category,
             company_name,
             extra_region_code,
-            branch_name
+            branch_name,
+            branch_handling
         })
     });
 
@@ -91,7 +126,8 @@ document.getElementById('generate-form').addEventListener('submit', async functi
                 category,
                 company_name,
                 extra_region_code,
-                branch_name
+                branch_name,
+                branch_handling
             })
         });
 

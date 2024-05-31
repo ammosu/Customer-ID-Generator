@@ -22,7 +22,7 @@ class CustomerIDGenerator:
     def __init__(self, excel_file):
         self.excel_file = f"{s3_directory}/{excel_file}"
         if not self.file_exists_in_s3():
-            self.data = pd.DataFrame(columns=['Region', 'Category', 'CompanyName', 'ExtraRegionCode', 'BranchName', 'CustomerID'])
+            self.data = pd.DataFrame(columns=['Region', 'Category', 'CompanyName', 'ExtraRegionCode', 'BranchName', 'BranchHandling', 'CustomerID'])
             self.save_to_s3()
         else:
             self.data = self.load_from_s3()
@@ -53,23 +53,27 @@ class CustomerIDGenerator:
             return data
         except Exception as e:
             logging.error(f"Error loading from S3: {e}")
-            return pd.DataFrame(columns=['Region', 'Category', 'CompanyName', 'ExtraRegionCode', 'BranchName', 'CustomerID'])
+            return pd.DataFrame(columns=['Region', 'Category', 'CompanyName', 'ExtraRegionCode', 'BranchName', 'BranchHandling', 'CustomerID'])
 
     def refresh_data(self):
         self.data = self.load_from_s3()
 
-    def preview_customer_id(self, region, category, company_name, extra_region_code=None, branch_name=None):
-        return self._generate_customer_id(region, category, company_name, extra_region_code, branch_name, preview=True)
+    def preview_customer_id(self, region, category, company_name, extra_region_code=None, branch_name=None, branch_handling=None):
+        return self._generate_customer_id(region, category, company_name, extra_region_code, branch_name, branch_handling, preview=True)
 
-    def generate_customer_id(self, region, category, company_name, extra_region_code=None, branch_name=None):
-        customer_id = self._generate_customer_id(region, category, company_name, extra_region_code, branch_name, preview=False)
+    def generate_customer_id(self, region, category, company_name, extra_region_code=None, branch_name=None, branch_handling=None):
+        customer_id = self._generate_customer_id(region, category, company_name, extra_region_code, branch_name, branch_handling, preview=False)
         if customer_id:
+            if self._is_customer_id_exists(customer_id):
+                logging.warning(f"Customer ID {customer_id} already exists. Skipping insertion.")
+                return customer_id
             new_entry = {
                 'Region': region,
                 'Category': category,
                 'CompanyName': company_name,
                 'ExtraRegionCode': extra_region_code,
                 'BranchName': branch_name,
+                'BranchHandling': branch_handling,
                 'CustomerID': customer_id
             }
             self.data = pd.concat([self.data, pd.DataFrame([new_entry])], ignore_index=True)
@@ -77,13 +81,17 @@ class CustomerIDGenerator:
             logging.info(f"Generated Customer ID: {customer_id} for {company_name}")
         return customer_id
 
-    def _generate_customer_id(self, region, category, company_name, extra_region_code=None, branch_name=None, preview=False):
+    def _is_customer_id_exists(self, customer_id):
+        return not self.data[self.data['CustomerID'] == customer_id].empty
+
+    def _generate_customer_id(self, region, category, company_name, extra_region_code=None, branch_name=None, branch_handling=None, preview=False):
         existing_record = self.data[
             (self.data['Region'] == region) &
             (self.data['Category'] == category) &
             (self.data['CompanyName'] == company_name) &
             (self.data['ExtraRegionCode'] == extra_region_code) &
-            (self.data['BranchName'] == branch_name)
+            (self.data['BranchName'] == branch_name) &
+            (self.data['BranchHandling'] == branch_handling)
         ]
 
         if not existing_record.empty:
@@ -110,7 +118,10 @@ class CustomerIDGenerator:
         category_code = category_codes.get(category, '9')
         region_serial = extra_region_codes.get(extra_region_code, '0')
 
-        if category_code in ['0', '1', '8']:
+        if category_code == '0' and branch_handling == '00開立發票客編':
+            company_serial = self._get_company_serial(region, category, company_name, extra_region_code, 3)
+            customer_id = f"{region_code}{category_code}{company_serial}{region_serial}00"
+        elif category_code in ['0', '1', '8']:
             company_serial = self._get_company_serial(region, category, company_name, extra_region_code, 3)
             branch_serial = self._get_branch_serial(region, category, company_name, extra_region_code, branch_name)
             customer_id = f"{region_code}{category_code}{company_serial}{region_serial}{branch_serial}"
@@ -150,8 +161,10 @@ class CustomerIDGenerator:
             return f"{(max_branch_serial + 1) if pd.notna(max_branch_serial) else 1:02d}"
         return '00' if not branch_name else '01'
 
-    def query_customer_id(self, company_name):
+    def query_customer_id(self, company_name, branch_handling=None):
         result = self.data[self.data['CompanyName'] == company_name]
+        if branch_handling:
+            result = result[result['BranchHandling'] == branch_handling]
         return result
 
     def search_company_name(self, keyword: str, region: str = None, category: str = None):

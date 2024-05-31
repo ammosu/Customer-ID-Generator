@@ -25,16 +25,22 @@
                     <div id="company_name_list" class="autocomplete-items"></div>
                 </div>
 
-                <div id="extra_fields">
+                <div class="form-section" id="extra_fields">
                     <label for="extra_region_code">Extra Region Code:</label>
                     <select id="extra_region_code" name="extra_region_code"></select>
-
-                    <label for="branch_name">Branch Name:</label>
+                
+                    <label for="branch_handling" id="branch_handling_label" style="display: none;">Branch Handling:</label>
+                    <select id="branch_handling" name="branch_handling" style="display: none;" onchange="updateBranchHandling()">
+                        <option value="00開立發票客編">00開立發票客編</option>
+                        <option value="以流水號編列此分行">以流水號編列此分行</option>
+                    </select>
+                
+                    <label for="branch_name" id="branch_name_label">Branch Name:</label>
                     <div style="position: relative;">
                         <input type="text" id="branch_name" name="branch_name" oninput="searchBranchName(this.value)">
                         <div id="branch_name_list" class="autocomplete-items"></div>
                     </div>
-                </div>
+                </div>                
 
                 <button type="submit">Generate</button>
             </form>
