@@ -163,11 +163,12 @@ class CustomerIDGenerator:
         result = filtered_data[filtered_data['CompanyName'].str.contains(keyword, case=False, na=False)]
         return result['CompanyName'].unique().tolist()
 
-    def search_branch_name(self, keyword: str, region: str, category: str, company_name: str):
+    def search_branch_name(self, keyword: str, region: str, category: str, company_name: str, extra_region_code: str):
         filtered_data = self.data[
             (self.data['Region'] == region) &
             (self.data['Category'] == category) &
-            (self.data['CompanyName'] == company_name)
+            (self.data['CompanyName'] == company_name) &
+            (self.data['ExtraRegionCode'] == extra_region_code)
         ]
         result = filtered_data[filtered_data['BranchName'].str.contains(keyword, case=False, na=False)]
         return result['BranchName'].unique().tolist()

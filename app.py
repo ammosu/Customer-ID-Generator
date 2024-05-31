@@ -37,7 +37,7 @@ class CustomerRequest(BaseModel):
 
     @field_validator('region')
     def region_must_be_valid(cls, v):
-        valid_regions = ["1北投", "2台南", "3高雄"]
+        valid_regions = ["0北投", "1台南", "2高雄"]
         if v not in valid_regions:
             raise ValueError('Invalid region')
         return v
@@ -137,8 +137,8 @@ def search_all_customer_ids(keyword: str = Query(..., min_length=1)):
     return {"customer_ids": customer_ids}
 
 @app.get("/search_branch_name/")
-def search_branch_name(keyword: str = Query(..., min_length=1), region: str = None, category: str = None, company_name: str = None):
-    branch_names = generator.search_branch_name(keyword, region, category, company_name)
+def search_branch_name(keyword: str = Query(..., min_length=1), region: str = None, category: str = None, company_name: str = None, extra_region_code: str = None):
+    branch_names = generator.search_branch_name(keyword, region, category, company_name, extra_region_code)
     return {"branch_names": branch_names}
 
 @app.get("/regions")

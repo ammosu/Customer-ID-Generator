@@ -7,10 +7,14 @@ async function fetchOptions(url, selectId) {
     select.innerHTML = '';  // Clear existing options
     options.forEach(option => {
         const opt = document.createElement('option');
-        opt.value = option;
-        opt.innerHTML = option;
+        opt.value = opt.textContent = option;
         select.appendChild(opt);
     });
+
+    // If this is the category select element, trigger the visibility update
+    if (selectId === 'category') {
+        updateFormVisibility();
+    }
 }
 
 function updateFormVisibility() {
@@ -215,6 +219,33 @@ async function searchCompanyName(keyword) {
             companyNameList.innerHTML = '';
         });
         companyNameList.appendChild(div);
+    });
+}
+
+async function searchBranchName(keyword) {
+    const region = document.getElementById('region').value;
+    const category = document.getElementById('category').value;
+    const company_name = document.getElementById('company_name').value;
+    const extra_region_code = document.getElementById('extra_region_code').value;
+
+    if (keyword.length < 1) {
+        document.getElementById('branch_name_list').innerHTML = '';
+        return;
+    }
+
+    const response = await fetch(`${backendUrl}/search_branch_name/?keyword=${keyword}&region=${region}&category=${category}&company_name=${company_name}&extra_region_code=${extra_region_code}`);
+    const result = await response.json();
+    const branchNameList = document.getElementById('branch_name_list');
+    branchNameList.innerHTML = '';
+
+    result.branch_names.forEach(name => {
+        const div = document.createElement('div');
+        div.innerText = name;
+        div.addEventListener('click', () => {
+            document.getElementById('branch_name').value = name;
+            branchNameList.innerHTML = '';
+        });
+        branchNameList.appendChild(div);
     });
 }
 
