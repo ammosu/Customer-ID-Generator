@@ -1,10 +1,10 @@
-// script.js
 const backendUrl = '';
 
 async function fetchOptions(url, selectId) {
     const response = await fetch(backendUrl + url);
     const options = await response.json();
     const select = document.getElementById(selectId);
+    select.innerHTML = '';  // Clear existing options
     options.forEach(option => {
         const opt = document.createElement('option');
         opt.value = option;
@@ -17,7 +17,7 @@ function updateFormVisibility() {
     const category = document.getElementById('category').value;
     const extraFields = document.getElementById('extra_fields');
 
-    if (["連鎖或相關企業的合開發票", "連鎖或相關企業的不合開發票", "達清關係企業"].includes(category)) {
+    if (["0連鎖或相關企業的合開發票", "1連鎖或相關企業的不合開發票", "8達清關係企業"].includes(category)) {
         extraFields.style.display = 'block';
     } else {
         extraFields.style.display = 'none';
@@ -36,9 +36,12 @@ function updateCompanyNameList() {
 document.addEventListener('DOMContentLoaded', () => {
     fetchOptions('/regions', 'region');
     fetchOptions('/categories', 'category');
-});
+    fetchOptions('/extra_region_codes', 'extra_region_code');
+    document.getElementById('category').addEventListener('change', updateFormVisibility);
 
-// script.js
+    // Initially show extra fields
+    document.getElementById('extra_fields').style.display = 'block';
+});
 
 document.getElementById('generate-form').addEventListener('submit', async function(event) {
     event.preventDefault();
@@ -48,7 +51,7 @@ document.getElementById('generate-form').addEventListener('submit', async functi
     const extra_region_code = document.getElementById('extra_region_code').value;
     const branch_name = document.getElementById('branch_name').value;
 
-    if (!company_name || (["連鎖或相關企業的合開發票", "連鎖或相關企業的不合開發票", "達清關係企業"].includes(category) && !branch_name)) {
+    if (!company_name || (["0連鎖或相關企業的合開發票", "1連鎖或相關企業的不合開發票", "8達清關係企業"].includes(category) && !branch_name)) {
         alert("公司名稱和分支名稱（若適用）不能為空。");
         return;
     }

@@ -89,23 +89,29 @@ class CustomerIDGenerator:
         if not existing_record.empty:
             return existing_record['CustomerID'].iloc[0]
 
-        region_codes = {'北投': '1', '台南': '2', '高雄': '3'}
+        region_codes = {'1北投': '1', '2台南': '2', '3高雄': '3'}
         category_codes = {
-            '連鎖或相關企業的合開發票': '0',
-            '連鎖或相關企業的不合開發票': '1',
-            '單一客戶': '2',
-            '機動': '6',
-            '未定': '7',
-            os.getenv('DACHING_RELATIONSHIP'): '8',
-            '其他': '9'
+            '0連鎖或相關企業的合開發票': '0',
+            '1連鎖或相關企業的不合開發票': '1',
+            '2單一客戶': '2',
+            '6機動': '6',
+            '7未定': '7',
+            f"8{os.getenv('DACHING_RELATIONSHIP')}": '8',
+            '9其他': '9'
+        }
+
+        extra_region_codes = {
+            "0無區分": "0", "1本縣市": "1", "2本縣市": "2", "3本縣市": "3",
+            "4本縣市": "4", "5外縣市": "5", "6外縣市": "6", "7外縣市": "7",
+            "8外縣市": "8", "9外縣市": "9"
         }
 
         region_code = region_codes.get(region, '0')
         category_code = category_codes.get(category, '9')
+        region_serial = extra_region_codes.get(extra_region_code, '0')
 
-        if category_code in ['0', '1', os.getenv('DACHING_RELATIONSHIP')]:
+        if category_code in ['0', '1', '8']:
             company_serial = self._get_company_serial(region, category, company_name, extra_region_code, 3)
-            region_serial = '1' if extra_region_code == '本縣市' else '5'
             branch_serial = self._get_branch_serial(region, category, company_name, extra_region_code, branch_name)
             customer_id = f"{region_code}{category_code}{company_serial}{region_serial}{branch_serial}"
         else:

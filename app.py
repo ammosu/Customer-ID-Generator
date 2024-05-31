@@ -1,9 +1,8 @@
-# app.py
 from fastapi import FastAPI, HTTPException, UploadFile, File, Query
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 import pandas as pd
 import numpy as np
 import os
@@ -30,28 +29,35 @@ excel_file = 'customer_ids.xlsx'
 generator = CustomerIDGenerator(excel_file)
 
 class CustomerRequest(BaseModel):
-    region: str
-    category: str
-    company_name: str
+    region: str = Field(...)
+    category: str = Field(...)
+    company_name: str = Field(...)
     extra_region_code: str = None
     branch_name: str = None
 
     @field_validator('region')
     def region_must_be_valid(cls, v):
-        valid_regions = ["北投", "台南", "高雄"]
+        valid_regions = ["1北投", "2台南", "3高雄"]
         if v not in valid_regions:
             raise ValueError('Invalid region')
         return v
 
     @field_validator('category')
     def category_must_be_valid(cls, v):
-        valid_categories = ["連鎖或相關企業的合開發票", "連鎖或相關企業的不合開發票", "單一客戶", "機動", "未定", os.getenv('DACHING_RELATIONSHIP'), "其他"]
+        valid_categories = ["0連鎖或相關企業的合開發票", "1連鎖或相關企業的不合開發票", "2單一客戶", "6機動", "7未定", f"8{os.getenv('DACHING_RELATIONSHIP')}", "9其他"]
         if v not in valid_categories:
             raise ValueError('Invalid category')
         return v
 
+    @field_validator('extra_region_code', mode='before')
+    def extra_region_code_must_be_valid(cls, v):
+        valid_extra_region_codes = ["0無區分", "1本縣市", "2本縣市", "3本縣市", "4本縣市", "5外縣市", "6外縣市", "7外縣市", "8外縣市", "9外縣市"]
+        if v not in valid_extra_region_codes:
+            raise ValueError('Invalid extra_region_code')
+        return v
+
 class QueryCustomerRequest(BaseModel):
-    company_name: str
+    company_name: str = Field(...)
 
 @app.post("/import_excel")
 async def import_excel(file: UploadFile = File(...)):
@@ -137,11 +143,15 @@ def search_branch_name(keyword: str = Query(..., min_length=1), region: str = No
 
 @app.get("/regions")
 def get_regions():
-    return ["北投", "台南", "高雄"]
+    return ["1北投", "2台南", "3高雄"]
 
 @app.get("/categories")
 def get_categories():
-    return ["連鎖或相關企業的合開發票", "連鎖或相關企業的不合開發票", "單一客戶", "機動", "未定", os.getenv('DACHING_RELATIONSHIP'), "其他"]
+    return ["0連鎖或相關企業的合開發票", "1連鎖或相關企業的不合開發票", "2單一客戶", "6機動", "7未定", f"8{os.getenv('DACHING_RELATIONSHIP')}", "9其他"]
+
+@app.get("/extra_region_codes")
+def get_extra_region_codes():
+    return ["0無區分", "1本縣市", "2本縣市", "3本縣市", "4本縣市", "5外縣市", "6外縣市", "7外縣市", "8外縣市", "9外縣市"]
 
 app.mount("/", StaticFiles(directory=".", html=True), name="static")
 
