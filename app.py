@@ -37,7 +37,7 @@ class CustomerRequest(BaseModel):
 
     @field_validator('region')
     def region_must_be_valid(cls, v):
-        valid_regions = ["0北投", "1台南", "2高雄"]
+        valid_regions = ["1北投", "2台南", "3高雄"]
         if v not in valid_regions:
             raise ValueError('Invalid region')
         return v
