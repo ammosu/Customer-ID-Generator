@@ -8,6 +8,7 @@ import numpy as np
 import os
 import io
 import logging
+from typing import Optional
 from dotenv import load_dotenv
 from customer_id_generator import CustomerIDGenerator
 
@@ -32,9 +33,9 @@ class CustomerRequest(BaseModel):
     region: str = Field(...)
     category: str = Field(...)
     company_name: str = Field(...)
-    extra_region_code: str = None
-    branch_name: str = None
-    branch_handling: str = Field(None)
+    extra_region_code: Optional[str] = None
+    branch_name: Optional[str] = None
+    branch_handling: Optional[str] = None
 
     @field_validator('region')
     def region_must_be_valid(cls, v):
@@ -66,6 +67,7 @@ class CustomerRequest(BaseModel):
         if category == "0連鎖或相關企業的合開發票" and branch_handling == "以流水號編列此分行" and not v:
             raise ValueError('對於所選類別和分支處理，分支名稱是必需的。')
         return v if v is not None else ""
+    
 class QueryCustomerRequest(BaseModel):
     company_name: str
     branch_handling: str = None

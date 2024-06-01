@@ -39,6 +39,15 @@ function updateFormVisibility() {
         branchNameLabel.style.display = 'block';
     } else {
         extraFields.style.display = 'none';
+        branchHandling.style.display = 'none';
+        branchHandlingLabel.style.display = 'none';
+        branchName.style.display = 'none';
+        branchNameLabel.style.display = 'none';
+        
+        // 清除不相關字段的值
+        document.getElementById('extra_region_code').value = '';
+        document.getElementById('branch_handling').value = '';
+        document.getElementById('branch_name').value = '';
     }
 }
 
@@ -50,7 +59,7 @@ function updateBranchHandling() {
     if (branchHandling === "00開立發票客編") {
         branchName.style.display = 'none';
         branchNameLabel.style.display = 'none';
-        branchName.value = ''; // Clear the branch name if not needed
+        branchName.value = ''; // 清除分支名稱的值
     } else {
         branchName.style.display = 'block';
         branchNameLabel.style.display = 'block';
@@ -81,9 +90,37 @@ document.getElementById('generate-form').addEventListener('submit', async functi
     const region = document.getElementById('region').value;
     const category = document.getElementById('category').value;
     const company_name = document.getElementById('company_name').value;
-    const extra_region_code = document.getElementById('extra_region_code').value;
-    const branch_handling = document.getElementById('branch_handling').value;
+    let extra_region_code = document.getElementById('extra_region_code').value;
+    let branch_handling = document.getElementById('branch_handling').value;
     let branch_name = document.getElementById('branch_name').value;
+
+    // 清除不需要的字段
+    if (document.getElementById('extra_fields').style.display === 'none') {
+        extra_region_code = null;
+    }
+    if (document.getElementById('branch_handling').style.display === 'none') {
+        branch_handling = null;
+    }
+    if (document.getElementById('branch_name').style.display === 'none') {
+        branch_name = null;
+    }
+
+    // 構建請求數據
+    const requestData = {
+        region,
+        category,
+        company_name
+    };
+
+    if (extra_region_code !== null) {
+        requestData.extra_region_code = extra_region_code;
+    }
+    if (branch_handling !== null) {
+        requestData.branch_handling = branch_handling;
+    }
+    if (branch_name !== null) {
+        requestData.branch_name = branch_name;
+    }
 
     if (!company_name || (category === "0連鎖或相關企業的合開發票" && branch_handling === "以流水號編列此分行" && !branch_name)) {
         alert("公司名稱和分支名稱（若適用）不能為空。");
@@ -99,14 +136,7 @@ document.getElementById('generate-form').addEventListener('submit', async functi
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-            region,
-            category,
-            company_name,
-            extra_region_code,
-            branch_name,
-            branch_handling
-        })
+        body: JSON.stringify(requestData)
     });
 
     const result = await response.json();
@@ -121,14 +151,7 @@ document.getElementById('generate-form').addEventListener('submit', async functi
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                region,
-                category,
-                company_name,
-                extra_region_code,
-                branch_name,
-                branch_handling
-            })
+            body: JSON.stringify(requestData)
         });
 
         const confirmResult = await confirmResponse.json();
