@@ -142,6 +142,11 @@ def search_all_company_names(keyword: str = Query(..., min_length=1)):
     company_names = generator.search_company_name(keyword)
     return {"company_names": company_names}
 
+@app.get("/search_all_branch_names/")
+def search_all_branch_names(keyword: str = Query(..., min_length=1)):
+    branch_names = generator.search_branch_name(keyword)
+    return {"branch_names": branch_names}
+
 @app.get("/search_all_customer_ids/")
 def search_all_customer_ids(keyword: str = Query(..., min_length=1)):
     filtered_data = generator.data[generator.data['CustomerID'].str.contains(keyword, case=False, na=False)]

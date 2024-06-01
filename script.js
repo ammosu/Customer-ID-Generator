@@ -257,15 +257,12 @@ document.getElementById('import-form').addEventListener('submit', async function
 });
 
 async function searchCompanyName(keyword) {
-    const region = document.getElementById('region').value;
-    const category = document.getElementById('category').value;
-
     if (keyword.length < 1) {
         document.getElementById('company_name_list').innerHTML = '';
         return;
     }
 
-    const response = await fetch(`${backendUrl}/search_company_name/?keyword=${keyword}&region=${region}&category=${category}`);
+    const response = await fetch(`${backendUrl}/search_all_company_names/?keyword=${keyword}`);
     const result = await response.json();
     const companyNameList = document.getElementById('company_name_list');
     companyNameList.innerHTML = '';
@@ -282,17 +279,12 @@ async function searchCompanyName(keyword) {
 }
 
 async function searchBranchName(keyword) {
-    const region = document.getElementById('region').value;
-    const category = document.getElementById('category').value;
-    const company_name = document.getElementById('company_name').value;
-    const extra_region_code = document.getElementById('extra_region_code').value;
-
     if (keyword.length < 1) {
         document.getElementById('branch_name_list').innerHTML = '';
         return;
     }
 
-    const response = await fetch(`${backendUrl}/search_branch_name/?keyword=${keyword}&region=${region}&category=${category}&company_name=${company_name}&extra_region_code=${extra_region_code}`);
+    const response = await fetch(`${backendUrl}/search_all_branch_names/?keyword=${keyword}`);
     const result = await response.json();
     const branchNameList = document.getElementById('branch_name_list');
     branchNameList.innerHTML = '';
@@ -307,6 +299,14 @@ async function searchBranchName(keyword) {
         branchNameList.appendChild(div);
     });
 }
+
+document.getElementById('company_name').addEventListener('input', function() {
+    searchCompanyName(this.value);
+});
+
+document.getElementById('branch_name').addEventListener('input', function() {
+    searchBranchName(this.value);
+});
 
 async function searchAllCompanyNames(keyword) {
     if (keyword.length < 1) {
