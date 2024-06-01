@@ -61,7 +61,20 @@
             <div id="query-result"></div>
             <div class="pagination" id="pagination"></div>
         </div>
-
+        
+        <div class="form-section" id="update-section" style="display: none;">
+            <h2>修改客戶信息</h2>
+            <form id="update-form">
+                <input type="hidden" id="update_customer_id" name="update_customer_id">
+                <label for="new_company_name">新公司名稱:</label>
+                <input type="text" id="new_company_name" name="new_company_name">
+                <label for="new_branch_name">新分支名稱:</label>
+                <input type="text" id="new_branch_name" name="new_branch_name">
+                <button type="submit">更新</button>
+            </form>
+            <div id="update-result" class="result"></div>
+        </div>
+        
         <div class="form-section">
             <h2>Delete Customer ID</h2>
             <form id="delete-form">

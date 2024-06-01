@@ -256,6 +256,39 @@ document.getElementById('import-form').addEventListener('submit', async function
     document.getElementById('import-result').innerText = result.detail;
 });
 
+document.getElementById('update-form').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    const customer_id = document.getElementById('update_customer_id').value;
+    const new_company_name = document.getElementById('new_company_name').value;
+    const new_branch_name = document.getElementById('new_branch_name').value;
+
+    const requestData = {
+        customer_id,
+        new_company_name,
+        new_branch_name
+    };
+
+    const response = await fetch(backendUrl + '/update_customer_info', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData)
+    });
+
+    const result = await response.json();
+    const updateResult = document.getElementById('update-result');
+    if (response.ok) {
+        updateResult.innerHTML = `更新成功: ${result.detail}`;
+        updateResult.className = 'result';
+    } else {
+        updateResult.innerHTML = `更新失敗: ${result.detail}`;
+        updateResult.className = 'error';
+    }
+});
+
+
+
 async function searchCompanyName(keyword) {
     if (keyword.length < 1) {
         document.getElementById('company_name_list').innerHTML = '';
@@ -365,7 +398,7 @@ function displayData(data) {
     function renderTable(page) {
         queryResult.innerHTML = '';
         const table = document.createElement('table');
-        const headers = ['Region', 'Category', 'CompanyName', 'ExtraRegionCode', 'BranchName', 'CustomerID'];
+        const headers = ['Region', 'Category', 'CompanyName', 'ExtraRegionCode', 'BranchName', 'CustomerID', 'Actions'];
         const thead = document.createElement('thead');
         const tr = document.createElement('tr');
 
@@ -387,7 +420,21 @@ function displayData(data) {
             const tr = document.createElement('tr');
             headers.forEach(header => {
                 const td = document.createElement('td');
-                td.innerText = row[header];
+                if (header === 'Actions') {
+                    const editButton = document.createElement('button');
+                    editButton.innerText = '修改';
+                    editButton.addEventListener('click', () => {
+                        enableEditing(tr, row.CustomerID);
+                    });
+                    td.appendChild(editButton);
+                } else if (header === 'CompanyName' || header === 'BranchName') {
+                    const span = document.createElement('span');
+                    span.innerText = row[header];
+                    span.dataset.field = header;
+                    td.appendChild(span);
+                } else {
+                    td.innerText = row[header];
+                }
                 tr.appendChild(td);
             });
             tbody.appendChild(tr);
@@ -406,14 +453,127 @@ function displayData(data) {
             button.addEventListener('click', () => {
                 currentPage = i;
                 renderTable(currentPage);
+                updatePagination();
             });
             if (i === currentPage) {
-                button.style.fontWeight = 'bold';
+                button.classList.add('current-page');
             }
             pagination.appendChild(button);
         }
     }
 
+    function updatePagination() {
+        const buttons = pagination.querySelectorAll('button');
+        buttons.forEach(button => {
+            if (parseInt(button.innerText) === currentPage) {
+                button.classList.add('current-page');
+            } else {
+                button.classList.remove('current-page');
+            }
+        });
+    }
+
     renderTable(currentPage);
     renderPagination();
+}
+
+function populateUpdateForm(row) {
+    document.getElementById('update_customer_id').value = row.CustomerID;
+    document.getElementById('new_company_name').value = row.CompanyName;
+    document.getElementById('new_branch_name').value = row.BranchName;
+    document.getElementById('update-section').style.display = 'block';
+}
+
+function enableEditing(row, customerID) {
+    const companyNameCell = row.querySelector('span[data-field="CompanyName"]');
+    const branchNameCell = row.querySelector('span[data-field="BranchName"]');
+    const actionsCell = row.querySelector('td:last-child');
+
+    const companyNameInput = document.createElement('input');
+    companyNameInput.type = 'text';
+    companyNameInput.value = companyNameCell.innerText;
+    companyNameInput.dataset.field = 'CompanyName';
+
+    const branchNameInput = document.createElement('input');
+    branchNameInput.type = 'text';
+    branchNameInput.value = branchNameCell.innerText;
+    branchNameInput.dataset.field = 'BranchName';
+
+    companyNameCell.replaceWith(companyNameInput);
+    branchNameCell.replaceWith(branchNameInput);
+
+    actionsCell.innerHTML = '';
+    const saveButton = document.createElement('button');
+    saveButton.innerText = '儲存';
+    saveButton.addEventListener('click', () => {
+        updateCustomerInfo(customerID, row);
+    });
+    const cancelButton = document.createElement('button');
+    cancelButton.innerText = '取消';
+    cancelButton.addEventListener('click', () => {
+        cancelEditing(row, companyNameCell, branchNameCell);
+    });
+    actionsCell.appendChild(saveButton);
+    actionsCell.appendChild(cancelButton);
+}
+
+function cancelEditing(row, companyNameCell, branchNameCell) {
+    const companyNameInput = row.querySelector('input[data-field="CompanyName"]');
+    const branchNameInput = row.querySelector('input[data-field="BranchName"]');
+
+    companyNameInput.replaceWith(companyNameCell);
+    branchNameInput.replaceWith(branchNameCell);
+
+    const actionsCell = row.querySelector('td:last-child');
+    actionsCell.innerHTML = '';
+    const editButton = document.createElement('button');
+    editButton.innerText = '修改';
+    editButton.addEventListener('click', () => {
+        enableEditing(row, row.querySelector('td:last-child').dataset.customerId);
+    });
+    actionsCell.appendChild(editButton);
+}
+
+async function updateCustomerInfo(customerID, row) {
+    const newCompanyName = row.querySelector('input[data-field="CompanyName"]').value;
+    const newBranchName = row.querySelector('input[data-field="BranchName"]').value;
+
+    const requestData = {
+        customer_id: customerID,
+        new_company_name: newCompanyName,
+        new_branch_name: newBranchName
+    };
+
+    const response = await fetch(backendUrl + '/update_customer_info', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData)
+    });
+
+    const result = await response.json();
+    const updateResult = document.createElement('div');
+    updateResult.className = response.ok ? 'result' : 'error';
+    updateResult.innerText = response.ok ? `更新成功: ${result.detail}` : `更新失敗: ${result.detail}`;
+
+    // 清除之前的更新結果提示
+    const previousUpdateResult = row.querySelector('.result, .error');
+    if (previousUpdateResult) {
+        previousUpdateResult.remove();
+    }
+
+    row.querySelector('td:last-child').appendChild(updateResult);
+
+    if (response.ok) {
+        const companyNameCell = document.createElement('span');
+        companyNameCell.innerText = newCompanyName;
+        companyNameCell.dataset.field = 'CompanyName';
+
+        const branchNameCell = document.createElement('span');
+        branchNameCell.innerText = newBranchName;
+        branchNameCell.dataset.field = 'BranchName';
+
+        cancelEditing(row, companyNameCell, branchNameCell);
+    }
 }

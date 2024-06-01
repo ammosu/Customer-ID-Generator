@@ -174,3 +174,15 @@ class CustomerIDGenerator:
     def search_branch_name(self, keyword: str):
         result = self.data[self.data['BranchName'].str.contains(keyword, case=False, na=False)]
         return result['BranchName'].unique().tolist()
+
+    def update_customer_info(self, customer_id, new_company_name=None, new_branch_name=None):
+        if customer_id not in self.data['CustomerID'].values:
+            raise ValueError("客戶ID不存在")
+
+        if new_company_name:
+            self.data.loc[self.data['CustomerID'] == customer_id, 'CompanyName'] = new_company_name
+        if new_branch_name:
+            self.data.loc[self.data['CustomerID'] == customer_id, 'BranchName'] = new_branch_name
+
+        self.save_to_s3()
+        logging.info(f"Updated Customer ID: {customer_id} with new company name: {new_company_name} and new branch name: {new_branch_name}")

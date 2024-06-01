@@ -67,11 +67,24 @@ class CustomerRequest(BaseModel):
         if category == "0連鎖或相關企業的合開發票" and branch_handling == "以流水號編列此分行" and not v:
             raise ValueError('對於所選類別和分支處理，分支名稱是必需的。')
         return v if v is not None else ""
-    
+
+class UpdateCustomerRequest(BaseModel):
+    customer_id: str = Field(...)
+    new_company_name: Optional[str] = None
+    new_branch_name: Optional[str] = None
+
 class QueryCustomerRequest(BaseModel):
     company_name: str
     branch_handling: str = None
 
+@app.post("/update_customer_info")
+def update_customer_info(request: UpdateCustomerRequest):
+    try:
+        generator.update_customer_info(request.customer_id, request.new_company_name, request.new_branch_name)
+        return {"detail": "客戶信息更新成功"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
 @app.post("/import_excel")
 async def import_excel(file: UploadFile = File(...)):
     content = await file.read()

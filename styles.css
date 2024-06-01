@@ -106,8 +106,12 @@ th {
     text-align: center;
 }
 .pagination button {
-    margin: 0 5px;
+    background-color: #f0f0f0; /* 其他按鈕的背景色 */
+    color: #000; /* 其他按鈕的文字顏色 */
+    border: 1px solid #ccc;
     padding: 5px 10px;
+    margin: 0 5px;
+    cursor: pointer;
 }
 #branch_handling {
     width: 100%;
@@ -116,4 +120,10 @@ th {
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
+}
+
+.pagination button.current-page {
+    font-weight: bold;
+    background-color: #007bff; /* 當前頁數按鈕的背景色 */
+    color: white; /* 當前頁數按鈕的文字顏色 */
 }
