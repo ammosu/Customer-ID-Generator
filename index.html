@@ -8,94 +8,100 @@
 </head>
 <body>
     <div class="container">
-        <h1>Customer ID Generator</h1>
+        <div class="header">
+            <div class="language-selector">
+                <button id="btn-en" onclick="setLanguage('en')">English</button>
+                <button id="btn-zh" onclick="setLanguage('zh')">中文</button>
+            </div>
+        </div>
+        <h1 id="title" data-translate="title">Customer ID Generator</h1>
 
         <div class="form-section">
-            <h2>Generate Customer ID</h2>
+            <h2 data-translate="generateCustomerId">Generate Customer ID</h2>
             <form id="generate-form">
-                <label for="region">Region:</label>
+                <label for="region" data-translate="region">Region:</label>
                 <select id="region" name="region" onchange="updateCompanyNameList()"></select>
 
-                <label for="category">Category:</label>
+                <label for="category" data-translate="category">Category:</label>
                 <select id="category" name="category" onchange="updateFormVisibility(); updateCompanyNameList()"></select>
 
-                <label for="company_name">Company Name:</label>
+                <label for="company_name" data-translate="companyName">Company Name:</label>
                 <div style="position: relative;">
                     <input type="text" id="company_name" name="company_name" oninput="searchCompanyName(this.value)">
                     <div id="company_name_list" class="autocomplete-items"></div>
                 </div>
 
                 <div class="form-section" id="extra_fields">
-                    <label for="extra_region_code">Extra Region Code:</label>
+                    <label for="extra_region_code" data-translate="extraRegionCode">Extra Region Code:</label>
                     <select id="extra_region_code" name="extra_region_code"></select>
                 
-                    <label for="branch_handling" id="branch_handling_label" style="display: none;">Branch Handling:</label>
+                    <label for="branch_handling" id="branch_handling_label" data-translate="branchHandling" style="display: none;">Branch Handling:</label>
                     <select id="branch_handling" name="branch_handling" style="display: none;" onchange="updateBranchHandling()">
                         <option value="00開立發票客編">00開立發票客編</option>
                         <option value="以流水號編列此分行">以流水號編列此分行</option>
                     </select>
                 
-                    <label for="branch_name" id="branch_name_label">Branch Name:</label>
+                    <label for="branch_name" id="branch_name_label" data-translate="branchName">Branch Name:</label>
                     <div style="position: relative;">
                         <input type="text" id="branch_name" name="branch_name" oninput="searchBranchName(this.value)">
                         <div id="branch_name_list" class="autocomplete-items"></div>
                     </div>
                 </div>                
 
-                <button type="submit">Generate</button>
+                <button type="submit" data-translate="generate">Generate</button>
             </form>
             <div id="generate-result" class="result"></div>
         </div>
 
         <div class="form-section">
-            <h2>Query Customer ID</h2>
+            <h2 data-translate="queryCustomerId">Query Customer ID</h2>
             <form id="query-form">
-                <label for="query_company_name">Company Name:</label>
+                <label for="query_company_name" data-translate="queryCompanyName">Company Name:</label>
                 <div style="position: relative;">
                     <input type="text" id="query_company_name" name="query_company_name" oninput="searchAllCompanyNames(this.value)">
                     <div id="query_company_name_list" class="autocomplete-items"></div>
                 </div>
 
-                <button type="submit">Query</button>
+                <button type="submit" data-translate="query">Query</button>
             </form>
             <div id="query-result"></div>
             <div class="pagination" id="pagination"></div>
         </div>
         
         <div class="form-section" id="update-section" style="display: none;">
-            <h2>修改客戶信息</h2>
+            <h2 data-translate="updateCustomerInfo">Update Customer Info</h2>
             <form id="update-form">
                 <input type="hidden" id="update_customer_id" name="update_customer_id">
-                <label for="new_company_name">新公司名稱:</label>
+                <label for="new_company_name" data-translate="newCompanyName">New Company Name:</label>
                 <input type="text" id="new_company_name" name="new_company_name">
-                <label for="new_branch_name">新分支名稱:</label>
+                <label for="new_branch_name" data-translate="newBranchName">New Branch Name:</label>
                 <input type="text" id="new_branch_name" name="new_branch_name">
-                <button type="submit">更新</button>
+                <button type="submit" data-translate="update">Update</button>
             </form>
             <div id="update-result" class="result"></div>
         </div>
         
         <div class="form-section">
-            <h2>Delete Customer ID</h2>
+            <h2 data-translate="deleteCustomerId">Delete Customer ID</h2>
             <form id="delete-form">
-                <label for="delete_customer_id">Customer ID:</label>
+                <label for="delete_customer_id" data-translate="deleteCustomerIdLabel">Customer ID:</label>
                 <div style="position: relative;">
                     <input type="text" id="delete_customer_id" name="delete_customer_id" oninput="searchAllCustomerIDs(this.value)">
                     <div id="delete_customer_id_list" class="autocomplete-items"></div>
                 </div>
 
-                <button type="submit">Delete</button>
+                <button type="submit" data-translate="delete">Delete</button>
             </form>
             <div id="delete-result" class="result"></div>
         </div>
 
         <div class="form-section">
-            <h2>Import/Export Excel</h2>
-            <button id="export-excel" class="button">Export Excel</button>
+            <h2 data-translate="importExportExcel">Import/Export Excel</h2>
+            <button id="export-excel" class="button" data-translate="exportExcel">Export Excel</button>
             <br><br>
             <form id="import-form">
                 <input type="file" id="import-file" name="file" accept=".xlsx">
-                <button type="submit" class="button">Import Excel</button>
+                <button type="submit" class="button" data-translate="importExcel">Import Excel</button>
             </form>
             <div id="import-result" class="result"></div>
         </div>

@@ -1,5 +1,76 @@
 const backendUrl = '';
 
+const translations = {
+    en: {
+        title: "Customer ID Generator",
+        generateCustomerId: "Generate Customer ID",
+        region: "Region:",
+        category: "Category:",
+        companyName: "Company Name:",
+        extraRegionCode: "Extra Region Code:",
+        branchHandling: "Branch Handling:",
+        branchName: "Branch Name:",
+        generate: "Generate",
+        queryCustomerId: "Query Customer ID",
+        queryCompanyName: "Company Name:",
+        query: "Query",
+        updateCustomerInfo: "Update Customer Info",
+        newCompanyName: "New Company Name:",
+        newBranchName: "New Branch Name:",
+        update: "Update",
+        deleteCustomerId: "Delete Customer ID",
+        deleteCustomerIdLabel: "Customer ID:",
+        delete: "Delete",
+        importExportExcel: "Import/Export Excel",
+        exportExcel: "Export Excel",
+        importExcel: "Import Excel"
+    },
+    zh: {
+        title: "客戶ID生成器",
+        generateCustomerId: "生成客戶ID",
+        region: "地區:",
+        category: "類別:",
+        companyName: "公司名稱:",
+        extraRegionCode: "額外區域代碼:",
+        branchHandling: "分支處理:",
+        branchName: "分支名稱:",
+        generate: "生成",
+        queryCustomerId: "查詢客戶ID",
+        queryCompanyName: "公司名稱:",
+        query: "查詢",
+        updateCustomerInfo: "更新客戶信息",
+        newCompanyName: "新公司名稱:",
+        newBranchName: "新分支名稱:",
+        update: "更新",
+        deleteCustomerId: "刪除客戶ID",
+        deleteCustomerIdLabel: "客戶ID:",
+        delete: "刪除",
+        importExportExcel: "導入/導出 Excel",
+        exportExcel: "導出 Excel",
+        importExcel: "導入 Excel"
+    }
+};
+
+function setLanguage(language) {
+    localStorage.setItem('language', language);
+    applyTranslations(language);
+    document.getElementById('btn-en').classList.toggle('active', language === 'en');
+    document.getElementById('btn-zh').classList.toggle('active', language === 'zh');
+}
+
+function applyTranslations(language) {
+    const elements = document.querySelectorAll('[data-translate]');
+    elements.forEach(element => {
+        const key = element.getAttribute('data-translate');
+        element.innerText = translations[language][key];
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const savedLanguage = localStorage.getItem('language') || 'en';
+    setLanguage(savedLanguage);
+});
+
 async function fetchOptions(url, selectId) {
     const response = await fetch(backendUrl + url);
     const options = await response.json();

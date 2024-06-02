@@ -1,10 +1,10 @@
-/* styles.css */
 body {
     font-family: Arial, sans-serif;
     background-color: #f0f2f5;
     margin: 0;
     padding: 0;
 }
+
 .container {
     width: 80%;
     margin: 0 auto;
@@ -13,24 +13,55 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     margin-top: 20px;
+    position: relative;
 }
+
+.header {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.language-selector {
+    display: flex;
+}
+
+.language-selector button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    margin-left: 5px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+    height: 40px; /* 使所有按鈕高度一致 */
+}
+
+.language-selector button.active {
+    background-color: #0056b3;
+}
+
 h1 {
     text-align: center;
     color: #333;
 }
+
 .form-section {
     margin-bottom: 40px;
 }
+
 .form-section h2 {
     color: #007bff;
     border-bottom: 2px solid #007bff;
     padding-bottom: 10px;
 }
+
 label {
     display: block;
     margin-top: 10px;
     font-weight: bold;
 }
+
 input[type="text"], select {
     width: 100%;
     padding: 10px;
@@ -39,6 +70,7 @@ input[type="text"], select {
     border-radius: 4px;
     box-sizing: border-box;
 }
+
 .autocomplete-items {
     border: 1px solid #ccc;
     border-top: none;
@@ -50,17 +82,21 @@ input[type="text"], select {
     z-index: 1;
     box-sizing: border-box; /* 确保宽度计算包含边框 */
 }
+
 .autocomplete-items div {
     padding: 10px;
     cursor: pointer;
 }
+
 .autocomplete-items div:hover {
     background-color: #e9e9e9;
 }
+
 .autocomplete-active {
     background-color: #007bff !important;
     color: #fff;
 }
+
 button {
     background-color: #007bff;
     color: #fff;
@@ -70,41 +106,51 @@ button {
     cursor: pointer;
     margin-top: 20px;
 }
+
 button:hover {
     background-color: #0056b3;
 }
+
 .result, .error {
     margin-top: 20px;
     padding: 10px;
     border-radius: 4px;
 }
+
 .result {
     background-color: #e9ffe9;
     color: #28a745;
 }
+
 .error {
     background-color: #ffe9e9;
     color: #dc3545;
 }
+
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
 }
+
 table, th, td {
     border: 1px solid #ccc;
 }
+
 th, td {
     padding: 10px;
     text-align: left;
 }
+
 th {
     background-color: #f8f9fa;
 }
+
 .pagination {
     margin-top: 20px;
     text-align: center;
 }
+
 .pagination button {
     background-color: #f0f0f0; /* 其他按鈕的背景色 */
     color: #000; /* 其他按鈕的文字顏色 */
@@ -113,6 +159,13 @@ th {
     margin: 0 5px;
     cursor: pointer;
 }
+
+.pagination button.current-page {
+    font-weight: bold;
+    background-color: #007bff; /* 當前頁數按鈕的背景色 */
+    color: white; /* 當前頁數按鈕的文字顏色 */
+}
+
 #branch_handling {
     width: 100%;
     padding: 10px;
@@ -120,10 +173,4 @@ th {
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
-}
-
-.pagination button.current-page {
-    font-weight: bold;
-    background-color: #007bff; /* 當前頁數按鈕的背景色 */
-    color: white; /* 當前頁數按鈕的文字顏色 */
 }

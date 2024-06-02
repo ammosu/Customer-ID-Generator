@@ -1,4 +1,5 @@
 import os
+import re
 import pandas as pd
 import logging
 
@@ -123,9 +124,12 @@ class CustomerIDGenerator:
             result = result[result['BranchHandling'] == branch_handling]
         return result
 
-    def search_company_name(self, keyword: str):
-        result = self.data[self.data['CompanyName'].str.contains(keyword, case=False, na=False)]
-        return result['CompanyName'].unique().tolist()
+    def search_company_name(self, keyword):
+        # Escape the keyword to handle special characters
+        escaped_keyword = re.escape(keyword)
+        result = self.data[self.data['CompanyName'].str.contains(escaped_keyword, case=False, na=False)]
+        result = result['CompanyName'].drop_duplicates()
+        return result
 
     def search_branch_name(self, keyword: str):
         result = self.data[self.data['BranchName'].str.contains(keyword, case=False, na=False)]

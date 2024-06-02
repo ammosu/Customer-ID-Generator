@@ -8,7 +8,7 @@ import numpy as np
 import os
 import io
 import logging
-from typing import Optional
+from typing import Optional, List
 from dotenv import load_dotenv
 from factory.data_access_factory import DataAccessFactory
 from customer_id.customer_id_generator import CustomerIDGenerator
@@ -88,6 +88,9 @@ class QueryCustomerRequest(BaseModel):
     company_name: str
     branch_handling: str = None
 
+class SearchResponse(BaseModel):
+    company_names: List[str]
+
 @app.post("/update_customer_info")
 def update_customer_info(request: UpdateCustomerRequest):
     try:
@@ -161,10 +164,10 @@ def search_company_name(keyword: str = Query(..., min_length=1), region: str = N
     company_names = generator.search_company_name(keyword, region, category)
     return {"company_names": company_names}
 
-@app.get("/search_all_company_names/")
+@app.get("/search_all_company_names/", response_model=SearchResponse)
 def search_all_company_names(keyword: str = Query(..., min_length=1)):
     company_names = generator.search_company_name(keyword)
-    return {"company_names": company_names}
+    return {"company_names": company_names.tolist()}
 
 @app.get("/search_all_branch_names/")
 def search_all_branch_names(keyword: str = Query(..., min_length=1)):
