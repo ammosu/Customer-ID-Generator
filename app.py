@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File, Query
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, field_validator, ValidationInfo
@@ -10,7 +10,8 @@ import io
 import logging
 from typing import Optional
 from dotenv import load_dotenv
-from customer_id_generator import CustomerIDGenerator
+from factory.data_access_factory import DataAccessFactory
+from customer_id.customer_id_generator import CustomerIDGenerator
 
 load_dotenv()
 
@@ -26,8 +27,18 @@ app.add_middleware(
 
 logging.basicConfig(level=logging.INFO)
 
-excel_file = 'customer_ids.xlsx'
-generator = CustomerIDGenerator(excel_file)
+# 使用工廠模式來創建 DataAccess 實例
+data_access = DataAccessFactory.get_data_access(
+    's3',
+    bucket_name=os.getenv('S3_BUCKET_NAME'),
+    directory=os.getenv('S3_DIRECTORY'),
+    file_name='customer_ids.xlsx',
+    region=os.getenv('AWS_REGION'),
+    access_key=os.getenv('AWS_ACCESS_KEY_ID'),
+    secret_key=os.getenv('AWS_SECRET_ACCESS_KEY')
+)
+# 初始化 CustomerIDGenerator
+generator = CustomerIDGenerator(data_access)
 
 class CustomerRequest(BaseModel):
     region: str = Field(...)
@@ -182,6 +193,10 @@ def get_categories():
 @app.get("/extra_region_codes")
 def get_extra_region_codes():
     return ["0無區分", "1本縣市", "2本縣市", "3本縣市", "4本縣市", "5外縣市", "6外縣市", "7外縣市", "8外縣市", "9外縣市"]
+
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    return FileResponse("static/favicon.ico")
 
 app.mount("/", StaticFiles(directory=".", html=True), name="static")
 

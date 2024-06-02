@@ -1,62 +1,18 @@
-import pandas as pd
 import os
-import io
+import pandas as pd
 import logging
-import boto3
-from dotenv import load_dotenv
-
-load_dotenv()
-
-s3_bucket_name = os.getenv('S3_BUCKET_NAME')
-s3_region = os.getenv('AWS_REGION')
-s3_directory = os.getenv('S3_DIRECTORY')
-
-s3_client = boto3.client(
-    's3',
-    aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-    aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
-    region_name=s3_region
-)
 
 class CustomerIDGenerator:
-    def __init__(self, excel_file):
-        self.excel_file = f"{s3_directory}/{excel_file}"
-        if not self.file_exists_in_s3():
+    def __init__(self, data_access):
+        self.data_access = data_access
+        if not self.data_access.file_exists():
             self.data = pd.DataFrame(columns=['Region', 'Category', 'CompanyName', 'ExtraRegionCode', 'BranchName', 'BranchHandling', 'CustomerID'])
-            self.save_to_s3()
+            self.data_access.save(self.data)
         else:
-            self.data = self.load_from_s3()
-
-    def file_exists_in_s3(self):
-        try:
-            s3_client.head_object(Bucket=s3_bucket_name, Key=self.excel_file)
-            return True
-        except Exception as e:
-            logging.error(f"Error checking if file exists in S3: {e}")
-            return False
-
-    def save_to_s3(self):
-        try:
-            with io.BytesIO() as output:
-                with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                    self.data.to_excel(writer, index=False)
-                output.seek(0)
-                s3_client.put_object(Bucket=s3_bucket_name, Key=self.excel_file, Body=output.read())
-        except Exception as e:
-            logging.error(f"Error saving to S3: {e}")
-
-    def load_from_s3(self):
-        try:
-            response = s3_client.get_object(Bucket=s3_bucket_name, Key=self.excel_file)
-            data = pd.read_excel(io.BytesIO(response['Body'].read()), engine='openpyxl')
-            data['CustomerID'] = data['CustomerID'].astype(str)
-            return data
-        except Exception as e:
-            logging.error(f"Error loading from S3: {e}")
-            return pd.DataFrame(columns=['Region', 'Category', 'CompanyName', 'ExtraRegionCode', 'BranchName', 'BranchHandling', 'CustomerID'])
+            self.data = self.data_access.load()
 
     def refresh_data(self):
-        self.data = self.load_from_s3()
+        self.data = self.data_access.load()
 
     def preview_customer_id(self, region, category, company_name, extra_region_code=None, branch_name=None, branch_handling=None):
         return self._generate_customer_id(region, category, company_name, extra_region_code, branch_name, branch_handling, preview=True)
@@ -77,7 +33,7 @@ class CustomerIDGenerator:
                 'CustomerID': customer_id
             }
             self.data = pd.concat([self.data, pd.DataFrame([new_entry])], ignore_index=True)
-            self.save_to_s3()
+            self.data_access.save(self.data)
             logging.info(f"Generated Customer ID: {customer_id} for {company_name}")
         return customer_id
 
@@ -184,5 +140,5 @@ class CustomerIDGenerator:
         if new_branch_name:
             self.data.loc[self.data['CustomerID'] == customer_id, 'BranchName'] = new_branch_name
 
-        self.save_to_s3()
+        self.data_access.save(self.data)
         logging.info(f"Updated Customer ID: {customer_id} with new company name: {new_company_name} and new branch name: {new_branch_name}")
