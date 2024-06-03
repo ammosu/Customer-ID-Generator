@@ -80,7 +80,7 @@ input[type="text"], select {
     position: absolute;
     width: 100%;
     z-index: 1;
-    box-sizing: border-box; /* 确保宽度计算包含边框 */
+    box-sizing: border-box; /* 確保寬度計算包含邊框 */
 }
 
 .autocomplete-items div {
@@ -127,10 +127,19 @@ button:hover {
     color: #dc3545;
 }
 
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 15px;
+    position: relative;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    display: block;
+    overflow: auto;
 }
 
 table, th, td {
@@ -140,6 +149,7 @@ table, th, td {
 th, td {
     padding: 10px;
     text-align: left;
+    white-space: nowrap;
 }
 
 th {
@@ -173,4 +183,28 @@ th {
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
+}
+
+/* 在手機螢幕上進行調整 */
+@media screen and (max-width: 600px) {
+    .container {
+        width: 100%;
+        padding: 10px;
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    table {
+        display: block;
+        width: 100%;
+        overflow: auto;
+    }
+    
+    th, td {
+        padding: 8px 5px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
 }

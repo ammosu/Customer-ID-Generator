@@ -75,14 +75,14 @@ async function fetchOptions(url, selectId) {
     const response = await fetch(backendUrl + url);
     const options = await response.json();
     const select = document.getElementById(selectId);
-    select.innerHTML = '';  // Clear existing options
+    select.innerHTML = '';  // 清除現有選項
     options.forEach(option => {
         const opt = document.createElement('option');
         opt.value = opt.textContent = option;
         select.appendChild(opt);
     });
 
-    // If this is the category select element, trigger the visibility update
+    // 如果這是category選擇元素，觸發可見性更新
     if (selectId === 'category') {
         updateFormVisibility();
     }
@@ -150,10 +150,10 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchOptions('/extra_region_codes', 'extra_region_code');
     document.getElementById('category').addEventListener('change', updateFormVisibility);
 
-    // Initially hide branch handling select and its label
+    // 最初隱藏branch handling選擇和其標籤
     document.getElementById('branch_handling').style.display = 'none';
     document.getElementById('branch_handling_label').style.display = 'none';
-    updateFormVisibility(); // Initialize form visibility based on default category
+    updateFormVisibility(); // 根據默認類別初始化表單可見性
 });
 
 document.getElementById('generate-form').addEventListener('submit', async function(event) {
@@ -357,8 +357,6 @@ document.getElementById('update-form').addEventListener('submit', async function
         updateResult.className = 'error';
     }
 });
-
-
 
 async function searchCompanyName(keyword) {
     if (keyword.length < 1) {
