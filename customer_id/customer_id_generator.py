@@ -15,6 +15,9 @@ class CustomerIDGenerator:
     def refresh_data(self):
         self.data = self.data_access.load()
 
+    def save(self):
+        self.data_access.save(self.data)
+
     def preview_customer_id(self, region, category, company_name, extra_region_code=None, branch_name=None, branch_handling=None):
         return self._generate_customer_id(region, category, company_name, extra_region_code, branch_name, branch_handling, preview=True)
 

@@ -102,7 +102,7 @@ async def import_excel(file: UploadFile = File(...)):
     df = pd.read_excel(io.BytesIO(content), engine='openpyxl')
     df['CustomerID'] = df['CustomerID'].fillna('').astype(str)
     generator.data = pd.concat([generator.data, df], ignore_index=True).drop_duplicates(subset=['CustomerID'])
-    generator.save_to_s3()
+    generator.save()
     generator.refresh_data()  # 刷新內存中的數據
     return {"detail": "Excel file imported successfully"}
 
@@ -122,7 +122,7 @@ def export_excel():
 def delete_customer_id(customer_id: str):
     if customer_id in generator.data['CustomerID'].values:
         generator.data = generator.data[generator.data['CustomerID'] != customer_id]
-        generator.save_to_s3()
+        generator.save()
         generator.refresh_data()  # 刷新內存中的數據
         logging.info(f"Deleted Customer ID: {customer_id}")
         return {"detail": "Customer ID deleted successfully"}
