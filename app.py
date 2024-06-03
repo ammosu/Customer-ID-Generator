@@ -29,13 +29,10 @@ logging.basicConfig(level=logging.INFO)
 
 # 使用工廠模式來創建 DataAccess 實例
 data_access = DataAccessFactory.get_data_access(
-    's3',
-    bucket_name=os.getenv('S3_BUCKET_NAME'),
-    directory=os.getenv('S3_DIRECTORY'),
-    file_name='customer_ids.xlsx',
-    region=os.getenv('AWS_REGION'),
-    access_key=os.getenv('AWS_ACCESS_KEY_ID'),
-    secret_key=os.getenv('AWS_SECRET_ACCESS_KEY')
+    'dropbox',
+    access_token=os.getenv('DROPBOX_ACCESS_TOKEN'),
+    directory=os.getenv('DROPBOX_DIRECTORY'),
+    file_name='customer_ids.xlsx'
 )
 # 初始化 CustomerIDGenerator
 generator = CustomerIDGenerator(data_access)
